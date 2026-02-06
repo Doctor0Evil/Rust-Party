@@ -1,0 +1,55 @@
+name: Sovereign CI Pipeline
+
+on:
+  pull_request:
+    branches: [ main, trunk, sovereign-* ]
+
+jobs:
+  validate_sovereign_artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Build guards and validators
+        run: |
+          cargo build --workspace --bins --all-features
+
+      - name: Validate Evolve Ledger (.evolve.jsonl)
+        run: |
+          echo "Validating .evolve.jsonl..."
+          cargo run --bin evolve-validator -- .evolve.jsonl
+
+      - name: Validate Neurorights Policy (.neurorights.json)
+        run: |
+          echo "Validating .neurorights.json..."
+          cargo run --bin schema-validator \
+            --schema-file policies/neurorights_schema.json \
+            --file-to-validate policies/.neurorights.json
+
+      - name: Check for Host-Bound Shards
+        run: |
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}... | tr '\n' ' ')
+          echo "Changed files: $CHANGED"
+          if git diff --name-only origin/${{ github.base_ref }}... \
+            | grep -E '\.(neuroaln|lifeforce\.aln)$' \
+            | grep -v '^fixtures/synthetic/' ; then
+            echo "Error: Commit contains host-bound neural shards outside fixtures/synthetic."
+            exit 1
+          fi
+          echo "No host-bound shards in PR."
+
+      - name: Generate NeuroXFS Manifest
+        run: |
+          cargo run --bin neuroxfs-cli -- generate-manifests --root .
+
+      - name: Run guard tests
+        run: |
+          cargo test -p aura_boundary_guard -p soul_non_tradeable_shield -p bio_load_throttle --all-features
