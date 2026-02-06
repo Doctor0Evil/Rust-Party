@@ -1,0 +1,9 @@
+[workspace]
+members = [
+    "crates/sovereign-core",
+    "crates/sovereign-evolve",
+    "crates/sovereign-neuroaura",
+]
+
+[workspace.package]
+edition = "2021"
