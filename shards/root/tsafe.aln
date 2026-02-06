@@ -1,0 +1,18 @@
+TsafeKernel {
+  axes: [
+    { name: "lifeforce_load",   min: 0.0, max: 0.8 },
+    { name: "biospec_fatigue",  min: 0.0, max: 0.7 },
+    { name: "roh_global",       min: 0.0, max: 0.30 },
+
+    # New quantum sovereignty axis
+    { name: "qpu_roh",          min: 0.0, max: 0.20 },
+    { name: "qpu_coherence",    min: 0.0, max: 0.60 },
+    { name: "qpu_eco_impact",   min: 0.0, max: 0.50 }
+  ],
+
+  # Optional tags to bind to governance and neurorights
+  tags: [
+    "QuantumSovereigntyEnvelope",
+    "PostQuantumRequired"
+  ]
+}
