@@ -1,0 +1,18 @@
+ViabilityKernel {
+  mode: "Normal",
+  constraints: [
+    # Global RoH ceiling
+    { expr: "roh_global <= 0.30" },
+
+    # Quantum sovereignty coupling
+    { expr: "qpu_roh <= 0.20" },
+    { expr: "qpu_roh + roh_global <= 0.30" },
+
+    # Lifeforce + QPU decoherence coupling
+    { expr: "lifeforce_load + 0.5 * qpu_coherence <= 1.0" },
+
+    # Eco impact cap for quantum neuromorph workloads
+    { expr: "qpu_eco_impact <= 0.50" }
+  ],
+  labels: [ "QuantumSovereigntyEnvelope" ]
+}
