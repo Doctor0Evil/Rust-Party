@@ -1,0 +1,8 @@
+[package]
+name = "eventhd-neuromorph"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { workspace = true }
+hd5d-core = { path = "../hd5d-core" }
