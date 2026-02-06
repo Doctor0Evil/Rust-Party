@@ -1,0 +1,23 @@
+[workspace]
+members = [
+  "crates/hd5d-core",
+  "crates/eventhd-neuromorph",
+  "crates/cortex-gate",
+  "crates/ai-shell",
+  "crates/neuromorph-runtime",
+]
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+authors = ["Bostrom Identity <bostrom18sd2u...>"]
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
+uuid = { version = "1", features = ["v4", "serde"] }
