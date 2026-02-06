@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "crates/sovereign-types",
+    "crates/sovereign-kernel",
+]
+
+[workspace.package]
+edition = "2021"
