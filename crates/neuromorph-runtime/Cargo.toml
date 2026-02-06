@@ -1,0 +1,11 @@
+[package]
+name = "neuromorph-runtime"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { workspace = true }
+anyhow = { workspace = true }
+hd5d-core = { path = "../hd5d-core" }
+eventhd-neuromorph = { path = "../eventhd-neuromorph" }
+ai-shell = { path = "../ai-shell" }
