@@ -1,0 +1,54 @@
+NeuroWorkspaceManifest {
+  subjectid: "bostrom18sd2u...",
+  description: "NeuroPC-local Rust-Party AI-node for augmented-citizen stack.",
+
+  shardsroot: "shards/root",
+  shardsbiospec: "shards/biospec",
+  shardsneuro: "shards/neuro",
+  shardsmodel: "shards/model",
+  shardsledger: "shards/ledger",
+
+  sovereign_config: {
+    rohmodel: "shards/root/rohmodel.aln",
+    stake: "shards/root/stake.aln",
+    neurorights: "shards/root/neurorights.json",
+    smart: "shards/root/smart.json",
+    evolve_token: "shards/root/evolve-token.json",
+    tsafe: "shards/root/tsafe.aln",
+    vkernel: "shards/root/vkernel.aln",
+    nnetfs_index: "shards/root/nnetfs-index.aln",
+    neurofs_index: "shards/root/neurofs-index.aln"
+  },
+
+  routes: [
+    "CHAT",
+    "CHAT-RESEARCH",
+    "BCI-COPILOT",
+    "GOV-ADVISOR"
+  ],
+
+  network_policies: {
+    # Hard boundary: no east-west connectivity to external urban / smart-city infra.
+    allowed_outbound_hosts: [
+      # Optional: allow software updates or package repos if needed.
+      "crates.io",
+      "github.com"
+    ],
+    forbidden_outbound_cidrs: [
+      "10.0.0.0/8",      # example private corp / city ranges
+      "172.16.0.0/12",
+      "192.168.0.0/16"
+    ],
+    # Explicitly forbid connections to any non-approved smart-city or urban infra nodes.
+    forbid_smart_city_integration: true
+  },
+
+  invariants: [
+    "Raw .neuroaln, .lifaln, .ocpuenv, .lifeforce.aln MUST NOT be exported or streamed over any network route.",
+    "No outbound TCP connections from AI-shell or LLM to addresses matching forbidden_outbound_cidrs.",
+    "No inbound connections to AI-shell or LLM from non-localhost interfaces.",
+    "Any attempt to weaken neurorights or cognitive_freedom MUST go through .evolve.jsonl with EVOLVE token and multi-sig in stake.aln.",
+    "Urban-infrastructure or authority nodes are NEVER recognized as stakeholders in stake.aln for this subjectid.",
+    "No OTA or control commands may be accepted from external nodes; OTA route is restricted to local, manually audited packages."
+  ]
+}
