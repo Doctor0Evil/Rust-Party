@@ -1,0 +1,55 @@
+version: "3.9"
+
+services:
+  llm:
+    image: localai/localai:latest   # example; replace with your chosen local LLM image
+    container_name: neuropc-llm
+    restart: unless-stopped
+    environment:
+      - LOCALAI_API_KEY=local-llm
+    volumes:
+      - ./models:/models
+    networks:
+      - neuropc_net
+    # No ports exposed to host; only ai-shell can see this via internal DNS.
+
+  ai-shell:
+    image: rustparty/ai-shell:latest   # build/publish from your ai-shell crate
+    container_name: neuropc-ai-shell
+    restart: unless-stopped
+    depends_on:
+      - llm
+    environment:
+      - LLM_BASE_URL=http://llm:8080/v1      # internal only
+      - LLM_API_KEY=local-llm
+      - SUBJECT_ID=bostrom18sd2u...
+      - POLICY_DIR=/neuroworkspace/shards/root
+      - ANSWER_LOG=/neuroworkspace/shards/ledger/answer.ndjson
+    volumes:
+      # Mount your neuromorph workspace read-only; ai-shell enforces Tsafe.
+      - ./neuroworkspace:/neuroworkspace:ro
+    networks:
+      - neuropc_net
+    # Expose only to localhost for your own use, not to the LAN/Internet.
+    ports:
+      - "127.0.0.1:8787:8787"
+
+  ui:
+    image: rustparty/ai-shell-ui:latest   # small web UI that talks only to ai-shell
+    container_name: neuropc-ai-shell-ui
+    restart: unless-stopped
+    depends_on:
+      - ai-shell
+    environment:
+      - AI_SHELL_URL=http://ai-shell:8787
+    networks:
+      - neuropc_net
+    ports:
+      - "127.0.0.1:8788:80"  # only you, on this machine, can access http://localhost:8788
+
+networks:
+  neuropc_net:
+    driver: bridge
+    internal: true
+    # internal: true -> containers on this network cannot be reached from outside;
+    # only mapped localhost ports are visible, and only on your machine.
