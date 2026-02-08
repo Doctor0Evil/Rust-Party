@@ -1,0 +1,58 @@
+name: Tsafe Cortex Gate CI
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build
+        run: cargo build --workspace --all-targets --locked
+      - name: Test
+        run: cargo test --workspace --all-targets --locked
+
+  policy-invariants:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Schema validation for neurorights and RoH
+        run: |
+          set -e
+          test -f policies/neurorights.json
+          test -f policies/rohmodel.aln
+          # neurorights required fields
+          jq '.mentalprivacy, .cognitiveliberty, .forbiddecisionuse, .dreamstatesensitive, .soulnontradeable, .storagescope' \
+            policies/neurorights.json > /dev/null
+          # assume rohmodel.aln is JSON-compatible
+          CEIL=$(jq '.ceiling' policies/rohmodel.aln)
+          python - << 'EOF'
+          import os, sys
+          ceil = float(os.environ["CEIL"])
+          if ceil > 0.3 + 1e-6:
+              print(f"RoH ceiling {ceil} exceeds 0.3")
+              sys.exit(1)
+          EOF
+
+      - name: Property-based tests for invariants
+        run: |
+          set -e
+          cargo test -p roh_guard -- --nocapture
+          cargo test -p neurorights_guard -- --nocapture
+
+  roh-monotonicity-sim:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run RoH monotonicity simulation lab
+        run: cargo test -p tsafe_cortex_gate --test roh_monotone_sim -- --nocapture
