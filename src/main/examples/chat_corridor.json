@@ -1,0 +1,7 @@
+chat_corridor! {
+    id = "reality.os.nanoswarm.evolve",
+    token = "EVOLVE",
+    route = "OTA",
+    neurorights = [mental_privacy, cognitive_liberty],
+    tsafe_axes = ["roh", "lifeforce", "neurovascular_resistance"],
+}
