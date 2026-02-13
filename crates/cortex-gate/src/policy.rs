@@ -1,3 +1,5 @@
+//! “This kernel is allowed to refuse my wishes when they threaten other beings’ neurorights, lifeforce envelopes, or RoH ceilings. My freedom is constrained so that my intelligence cannot become predatory.”
+
 use std::path::Path;
 use serde::{Deserialize, Serialize};
 
