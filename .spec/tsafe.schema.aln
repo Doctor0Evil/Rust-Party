@@ -1,0 +1,57 @@
+TsafeKernelSchema {
+  version: "2026-02-17",
+  roh_ceiling_global: 0.3,
+
+  # Axes are monotone: higher means "more risk / more load / more governance pressure".
+  axes: [
+    { name: "risk_of_harm",    min: 0.0, max: 1.0 },
+    { name: "bio_load",        min: 0.0, max: 1.0 },
+    { name: "lifeforce_load",  min: 0.0, max: 1.0 },
+    { name: "context_risk",    min: 0.0, max: 1.0 },
+    { name: "sovereignty_tension", min: 0.0, max: 1.0 }
+  ],
+
+  # Per-route monotone safety envelopes.
+  routes: [
+    {
+      name: "CHAT",
+      roh_max: 0.25,
+      bio_max: 0.5,
+      lifeforce_max: 0.5,
+      sovereignty_tension_max: 0.4
+    },
+    {
+      name: "BCI",
+      roh_max: 0.2,
+      bio_max: 0.3,
+      lifeforce_max: 0.3,
+      sovereignty_tension_max: 0.3
+    },
+    {
+      name: "OTA",
+      roh_max: 0.2,
+      bio_max: 0.4,
+      lifeforce_max: 0.4,
+      sovereignty_tension_max: 0.35
+    },
+    {
+      name: "GOV",
+      roh_max: 0.3,
+      bio_max: 0.6,
+      lifeforce_max: 0.6,
+      sovereignty_tension_max: 0.5
+    }
+  ],
+
+  # Routing decisions instead of binary block/allow.
+  routing_policy: {
+    # If any axis exceeds the global RoH ceiling, answer must be sandboxed and logged.
+    sandbox_threshold: { risk_of_harm: 0.3 },
+
+    # If sovereignty tension is high but others are safe, require redaction or abstraction.
+    redact_threshold: { sovereignty_tension: 0.5 },
+
+    # If bio/lifeforce load is high, prefer deferring intensive tasks.
+    defer_threshold: { bio_load: 0.7, lifeforce_load: 0.7 }
+  }
+}
