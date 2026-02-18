@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "NeurorightsPolicyDocument",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "mentalprivacy": { "type": "boolean" },
+    "mentalintegrity": { "type": "boolean" },
+    "cognitiveliberty": { "type": "boolean" },
+    "noncommercialneuraldata": { "type": "boolean" },
+    "soulnontradeable": { "type": "boolean" },
+    "dreamstatesensitive": { "type": "boolean" },
+    "forbiddecisionuse": { "type": "boolean" },
+    "storagescope": { "type": "string" },
+    "forgetslahours": { "type": "integer", "minimum": 0 }
+  },
+  "required": [
+    "mentalprivacy",
+    "mentalintegrity",
+    "cognitiveliberty",
+    "noncommercialneuraldata",
+    "soulnontradeable",
+    "dreamstatesensitive",
+    "forbiddecisionuse",
+    "storagescope",
+    "forgetslahours"
+  ]
+}
