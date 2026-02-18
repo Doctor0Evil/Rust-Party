@@ -9,6 +9,14 @@ use alnschemas::{NeurorightsPolicy, RohModel};
 use firewall::{FirewallDecision, MetaFirewall};
 use guardians::{EcoGuard, NeurorightsGuard, RohGuard};
 
+/// Shared error type used by all guards.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GuardError {
+    pub code: String,
+    pub message: String,
+}
+
+/// XR / sovereign action kind enumeration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum XRActionKind {
     ReadNeuralShard,
@@ -21,6 +29,7 @@ pub enum XRActionKind {
     SignTransaction,
 }
 
+/// Typed action used by Tsafe for XR / BCI / OTA flows.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct XRAction {
     pub kind: XRActionKind,
@@ -32,6 +41,7 @@ pub struct XRAction {
     pub roh_after_estimate: f32,
 }
 
+/// Capability kinds for AI / tool calls.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum CapabilityKind {
     SummarizeText,
@@ -40,6 +50,7 @@ pub enum CapabilityKind {
     XRRoutePlan,
 }
 
+/// Short‑lived, typed capability descriptor.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CapabilityChord {
     pub id: Uuid,
@@ -47,7 +58,8 @@ pub struct CapabilityChord {
     pub subject_id: String,
     pub max_tokens: u32,
     pub expires_at_unix: i64,
-    pub actuation_rights: String, // "SuggestOnly", "ConfigOnly"
+    /// "SuggestOnly", "ConfigOnly", etc.
+    pub actuation_rights: String,
 }
 
 impl CapabilityChord {
@@ -57,35 +69,43 @@ impl CapabilityChord {
     }
 }
 
+/// High‑level request into Tsafe Cortex Gate.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Request {
-    pub subject_id: String,          // Bostrom / zeta / 0x519f...
-    pub route: String,               // "BCI", "OTA", "GOV", "CHAT", "XR"
-    pub raw_prompt: Option<String>,  // only for LLM-mediated flows
-    pub action: XRAction,            // typed, non-text action
+    /// Bostrom / zeta / 0x519f...
+    pub subject_id: String,
+    /// "BCI", "OTA", "GOV", "CHAT", "XR"
+    pub route: String,
+    /// Only for LLM‑mediated flows.
+    pub raw_prompt: Option<String>,
+    /// Typed, non‑text action.
+    pub action: XRAction,
     pub capability: CapabilityChord,
 }
 
+/// Authorized action with optional constraints (redactions, rate limits).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AuthorizedAction {
     pub action: XRAction,
-    pub constraints: Vec<String>, // e.g. redactions, rate limits
+    pub constraints: Vec<String>,
 }
 
+/// Structured rejection reason.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RejectionReason {
     pub code: String,
     pub message: String,
 }
 
+/// Final authorization result.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AuthorizationResult {
     Authorized(AuthorizedAction),
     Rejected(RejectionReason),
 }
 
+/// Minimal placeholder: later, append‑only writer to shards/ledger/donutloop.aln.
 pub struct DonutloopLogger {
-    // minimal placeholder: later, append-only writer to shards/ledger/donutloop.aln
     log_path: std::path::PathBuf,
 }
 
@@ -95,7 +115,7 @@ impl DonutloopLogger {
     }
 
     pub fn log_allow(&self, _req: &Request) {
-        // TODO: append hash-linked entry to .donutloop.aln
+        // TODO: append hash‑linked entry to .donutloop.aln
     }
 
     pub fn log_reject(&self, _req: &Request, _code: &str) {
@@ -103,10 +123,11 @@ impl DonutloopLogger {
     }
 
     pub fn log_blocked(&self, _req: &Request, _reason: &str) {
-        // TODO: append firewall-block entry
+        // TODO: append firewall‑block entry
     }
 }
 
+/// Main Tsafe Cortex Gate type for XR / AI‑chat integration.
 pub struct TsafeCortexGate {
     firewall: MetaFirewall,
     roh_guard: RohGuard,
@@ -127,7 +148,7 @@ impl TsafeCortexGate {
     }
 
     pub fn authorize(&self, req: Request) -> AuthorizationResult {
-        // 1. Tsafe / NeuralTrust-style firewall over text.
+        // 1. Tsafe / NeuralTrust‑style firewall over text.
         if let Some(prompt) = &req.raw_prompt {
             match self.firewall.evaluate_prompt(prompt, &req.route) {
                 FirewallDecision::Block => {
@@ -169,19 +190,28 @@ impl TsafeCortexGate {
         // 3. Neurorights guard (mental privacy, dreamstate, soulnontradeable).
         if let Err(err) = self.nr_guard.check_action(&req.action, &req.route) {
             self.donutlogger.log_reject(&req, &err.code);
-            return AuthorizationResult::Rejected(err);
+            return AuthorizationResult::Rejected(RejectionReason {
+                code: err.code,
+                message: err.message,
+            });
         }
 
         // 4. RoH guard (0.3 ceiling, monotone safety).
         if let Err(err) = self.roh_guard.check(&req.action) {
             self.donutlogger.log_reject(&req, &err.code);
-            return AuthorizationResult::Rejected(err);
+            return AuthorizationResult::Rejected(RejectionReason {
+                code: err.code,
+                message: err.message,
+            });
         }
 
         // 5. Eco / lifeforce envelopes via .ocpuenv, .lifeforce.aln.
         if let Err(err) = self.eco_guard.check(&req.action, &req.route) {
             self.donutlogger.log_reject(&req, &err.code);
-            return AuthorizationResult::Rejected(err);
+            return AuthorizationResult::Rejected(RejectionReason {
+                code: err.code,
+                message: err.message,
+            });
         }
 
         // TODO: 6. EVOLVE token verification for structural / OTA actions.
