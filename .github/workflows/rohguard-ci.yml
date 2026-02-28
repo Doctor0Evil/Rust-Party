@@ -1,0 +1,27 @@
+name: RoH Invariants CI
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  roh-invariants:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build
+        run: cargo build --workspace --all-targets --locked
+      - name: Enforce RoH ceiling = 0.3
+        run: |
+          CEIL=$(jq '.ceiling' policies/rohmodel.aln)
+          python - << 'EOF'
+          import os, sys
+          ceil = float(os.environ["CEIL"])
+          if abs(ceil - 0.3) > 1e-6:
+              print(f"RoH ceiling {ceil} exceeds or differs from 0.3")
+              sys.exit(1)
+          EOF
+      - name: Run rohguard property tests
+        run: cargo test -p rohguard -- --nocapture
