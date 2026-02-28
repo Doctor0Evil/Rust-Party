@@ -1,0 +1,19 @@
+name: Sovereign Specs CI
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  sovereign-specs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build sovereign-specs
+        run: cargo build -p sovereign-specs --all-targets --locked
+
+      - name: Check Evolution Ledger Invariants
+        run: |
+          cargo run -p sovereign-specs --bin check_evolve_ledger
