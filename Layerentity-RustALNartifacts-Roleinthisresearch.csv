@@ -1,0 +1,8 @@
+"Layer / entity","Rust / ALN artifacts","Role in this research"
+"RoH / biophysical core",".rohmodel.aln,.ocpuenv,.lifeforce.aln,.vkernel.aln","Hard ≤0.3 ceiling, monotone safety, Tsafe viability kernels for all action types."
+"Neurorights",".neurorights.json,.nnet-rights.json","Mental privacy, dream-state, soulnontradeable, forbidden decision-use executed as guards."
+"Governance tokens",".smart.json,.evolve-token.json,.chat-governance.aln","SMART = bounded reversible tuning; EVOLVE = deep structural; CHAT = non-actuating deliberation."
+"Audit spine",".evolve.jsonl,.donutloop.aln,.bchainproof.json","Hash-linked evolution and decision logs, on-chain proofs for high-risk transitions."
+"Rust guardians","rohguard,neurorights-guard,ecoguard,evolve-token-verifier","Single-invariant crates called by Tsafe Cortex Gate / sovereigntycore."
+"Named protections","SoulNonTradeableShield, GraceEquityKernelShield, AuraBoundaryGuard, DreamSanctumFilter, BioLoadThrottle, SovereignKernelLock","Enforced in NeuroXFS and Tsafe; explicitly referenced in schemas and CI checks."
+"Sovereign kernel manifests","bostrom-sovereign-kernel-*.ndjson,policieslayout-*.aln,neuro-workspace.manifest.aln","Bind all shards and guard pipeline into a single, versioned sovereign spec."
