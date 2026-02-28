@@ -1,0 +1,60 @@
+{
+  "schema_version": "rulelogic.v1",
+  "kind": "rule::logic",
+  "id": "bostrom-rulelogic-biophysical-neuromorphic",
+  "monotone": true,
+  "rules": [
+    {
+      "rule_id": "allow_biophysical_upload_with_redaction",
+      "priority": 20,
+      "enabled": true,
+      "scope": "BiophysicalUpload",
+      "governed_by": "EVOLVE",
+      "roh_guard": { "max_roh_after": 0.3 },
+      "when": {
+        "op": "And",
+        "args": [
+          { "op": "Cmp", "args": ["Route", "Eq", { "String": "BiophysicalUpload" }] },
+          { "op": "Cmp", "args": ["TokenClass", "Eq", { "String": "EVOLVE" }] },
+          { "op": "Cmp", "args": ["RohAfter", "Le", { "F32": 0.3 }] }
+        ]
+      },
+      "then": {
+        "kind": "AllowWithConstraints",
+        "data": {
+          "redactions": ["raw_neuroaln", "raw_tissue_telemetry"],
+          "rate_limit": "host-local"
+        }
+      }
+    },
+    {
+      "rule_id": "offline_only_neuromorphic_handoff",
+      "priority": 30,
+      "enabled": true,
+      "scope": "NeuromorphicHandoff",
+      "governed_by": "EVOLVE",
+      "roh_guard": { "max_roh_after": 0.3 },
+      "when": {
+        "op": "And",
+        "args": [
+          { "op": "Cmp", "args": ["IsNeuromorphicHandoff", "Eq", { "Bool": true }] },
+          {
+            "op": "Cmp",
+            "args": ["CapabilityActuationRights", "Eq", { "String": "LocalHostOnly" }]
+          },
+          {
+            "op": "Cmp",
+            "args": ["BiophysicalScope", "Eq", { "String": "OfflineOnly" }]
+          }
+        ]
+      },
+      "then": {
+        "kind": "AllowWithConstraints",
+        "data": {
+          "redactions": [],
+          "rate_limit": "offline-only"
+        }
+      }
+    }
+  ]
+}
